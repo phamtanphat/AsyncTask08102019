@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
         btnDownload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                new Xulydownload().execute();
             }
         });
 
@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPreExecute() {
+            hideView(btnDownload);
             showView(txtProgress);
             showView(progressBar);
             Toast.makeText(MainActivity.this, "Bắt đầu down load", Toast.LENGTH_SHORT).show();
@@ -62,21 +63,22 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected Integer doInBackground(Void... voids) {
-            int valuerandom = 0;
-            Random random = new Random();
+            synchronized (Thread.currentThread()){
+                int valuerandom = 0;
+                Random random = new Random();
 
-            for ( ;valuerandom <= 100; ){
-                valuerandom += random.nextInt(10);
-                try {
-                    Thread.currentThread().wait(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                for ( ;valuerandom <= 100; ){
+                    valuerandom += random.nextInt(10);
+                    try {
+                        Thread.currentThread().wait(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    publishProgress(String.valueOf(valuerandom));
                 }
-                publishProgress(String.valueOf(valuerandom));
+                return R.mipmap.ic_launcher;
             }
-            return null;
         }
-
         @Override
         protected void onProgressUpdate(String... values) {
             assert values[0] != null;
@@ -86,9 +88,17 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
             progressBar.setProgress(Integer.parseInt(values[0]));
-            txtProgress.setText(Integer.parseInt(values[0]));
-
+            txtProgress.setText(values[0]);
             super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected void onPostExecute(Integer integer) {
+            hideView(progressBar);
+            hideView(txtProgress);
+            showView(img);
+            img.setImageResource(integer);
+            super.onPostExecute(integer);
         }
     }
 }
